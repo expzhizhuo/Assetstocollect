@@ -49,6 +49,6 @@ optional arguments:
 
 输出文件在脚本的当前目录为ip_result.txt和url_result.txt
 
-项目地址：
+项目地址：https://github.com/zhizhuoshuma/Assetstocollect
 
 后续会优化添加其他功能
