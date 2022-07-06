@@ -1,0 +1,2 @@
+# Assetstocollect
+一款基于fofa api语句的资产收集工具，用于红队快速收集顶级域名或者ip相关关联的资产
