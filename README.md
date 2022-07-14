@@ -15,7 +15,7 @@
 
 打开脚本文件修改config中的email和key，email是fofa的注册邮箱，key是fofa个人中心的api key
 
-```json
+```bash
 config = {
     'email': '',  # fofa的登录邮箱
     'key': '',  # fofa个人中心的key
