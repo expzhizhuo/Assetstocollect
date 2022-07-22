@@ -155,6 +155,9 @@ def Detection():
     vulurl = open('./result/vul_url.txt', 'a+', encoding='utf-8')
     vulurl.truncate(0)
     httpurl.truncate(0)
+    urlfile.close()
+    httpurl.close()
+    vulurl.close()
     for d in urllist:
         if 'http' in d:
             url = d
@@ -192,28 +195,27 @@ def Detection():
                     #     Error_msg = error_msg[0]
                     # else:
                     #     Error_msg = ""
-                    httpurl.write(url)
-                    httpurl.write('\n')
+                    with open('./result/active_url.txt', 'a+', encoding='utf-8') as fa:
+                        fa.write(url)
+                        fa.write('\n')
                 else:
                     pass
             else:
                 a = a+1
-                httpurl.write(url)
-                httpurl.write('\n')
+                with open('./result/active_url.txt', 'a+', encoding='utf-8') as fa:
+                    fa.write(url)
+                    fa.write('\n')
         except Exception as e:
             if 'timeout' not in str(e):
-                vulurl.write(url)
-                vulurl.write('\n')
+                with open('./result/vul_url.txt', 'a+', encoding='utf-8') as fe:
+                    fe.write(url)
+                    fe.write('\n')
                 f = f+1
                 print('[+] 此站点需要人工确认')
             else:
                 print('[+] 站点请求超时')
                 c = c+1
             pass
-
-    urlfile.close()
-    httpurl.close()
-    vulurl.close()
 
     print('================================================')
     print("可访问站点个数：", a)
