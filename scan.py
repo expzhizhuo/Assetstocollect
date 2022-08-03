@@ -59,7 +59,6 @@ def get_url_info(url_arg, file_arg):
             'full': 'true',
             'size': config['size'],
         }
-        print(data)
         resp = requests.get(
             url=config['base_url'], headers=headers, data=data, timeout=120).json()
         if resp['error'] == True:
