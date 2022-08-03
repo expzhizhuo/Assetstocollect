@@ -17,11 +17,24 @@ warnings.filterwarnings('ignore')
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = '1'
 
 config = {
-    'email': '',  # fofa的登录邮箱
-    'key': '',  # fofa个人中心的key
+    'email': 'xxxxxxxx',  # fofa的登录邮箱
+    'key': 'xxxxxxx',  # fofa个人中心的key
     'size': '100',  # 默认是是普通会员，普通会员做多100条，高级会员10000条
     'base_url': 'https://fofa.info/api/v1/search/all',  # fofa api接口地址
     'user_url': 'https://fofa.info/api/v1/info/my',  # fofa 账户信息接口
+}
+
+# 全局header头
+headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+    'Accept-Language': 'zh-CN,zh;q=0.9',
+    'Accept-Encoding': 'gzip, deflate, br',
+    # 'Connection':'keep-alive',#默认时链接一次，多次爬取之后不能产生新的链接就会产生报错Max retries exceeded with url
+    'Upgrade-Insecure-Requests': '1',
+    'Pragma': 'no-cache',
+    'Cache-Control': 'no-cache',
+    'Connection': 'close',  # 解决Max retries exceeded with url报错
 }
 
 
@@ -43,23 +56,29 @@ def get_url_info(url_arg, file_arg):
             'email': config['email'],
             'key': config['key'],
             'qbase64': base_fofa_search,
-            'full':'true',
+            'full': 'true',
             'size': config['size'],
         }
-        resp = requests.get(config['base_url'], data, timeout=60).json()
-        print(url+'关联资产有{}个'.format(resp['size']))
-        totals = totals + resp['size']
-        if resp['size'] > config['size']:
-            count = config['size']
+        print(data)
+        resp = requests.get(
+            url=config['base_url'], headers=headers, data=data, timeout=120).json()
+        if resp['error'] == True:
+            print('FOFA查询出错，错误信息：{}'.format(resp))
+            exit()
         else:
-            count = count + resp['size']
-        if resp['size'] > 0:
-            for key in range(0, int(len(resp['results']))):
-                output_url.write(resp['results'][key][0])
+            print(url+'关联资产有{}个'.format(resp['size']))
+            totals = totals + resp['size']
+            if resp['size'] > config['size']:
+                count = config['size']
+            else:
+                count = count + resp['size']
+            if resp['size'] > 0:
+                for key in range(0, int(len(resp['results']))):
+                    output_url.write(resp['results'][key][0])
+                    output_url.write('\n')
+            else:
+                output_url.write(url)
                 output_url.write('\n')
-        else:
-            output_url.write(url)
-            output_url.write('\n')
     output_url.close()
     print('总共收集到{}个关联资产'.format(totals))
     print('已经写入{}个关联资产'.format(count))
@@ -85,20 +104,25 @@ def get_ip_info(ip_arg, ip_file_arg):
             'qbase64': base_fofa_search,
             'size': config['size'],
         }
-        resp = requests.get(config['base_url'], data, timeout=60).json()
-        print(url+'关联资产有{}个'.format(resp['size']))
-        totals = totals + resp['size']
-        if resp['size'] > config['size']:
-            count = config['size']
+        resp = requests.get(
+            url=config['base_url'], headers=headers, data=data, timeout=120).json()
+        if resp['error'] == True:
+            print('FOFA查询出错，错误信息：{}'.format(resp))
+            exit()
         else:
-            count = count+resp['size']
-        if resp['size'] > 0:
-            for key in range(0, int(len(resp['results']))):
-                output_ip.write(resp['results'][key][0])
+            print(url+'关联资产有{}个'.format(resp['size']))
+            totals = totals + resp['size']
+            if resp['size'] > config['size']:
+                count = config['size']
+            else:
+                count = count+resp['size']
+            if resp['size'] > 0:
+                for key in range(0, int(len(resp['results']))):
+                    output_ip.write(resp['results'][key][0])
+                    output_ip.write('\n')
+            else:
+                output_ip.write(url)
                 output_ip.write('\n')
-        else:
-            output_ip.write(url)
-            output_ip.write('\n')
     output_ip.close()
     print('总共收集到{}个关联资产'.format(totals))
     print('已经写入{}个关联资产'.format(count))
@@ -111,7 +135,8 @@ def get_user_info(url_arg, file_arg, ip_arg, ip_file_arg):
         'email': config['email'],
         'key': config['key'],
     }
-    resp = requests.get(config['user_url'], data, timeout=60).json()
+    resp = requests.get(
+        url=config['user_url'], headers=headers, data=data, timeout=120).json()
     print('================================================')
     print('用户名：'+resp['username'])
     print('邮箱：'+resp['email'])
@@ -129,20 +154,10 @@ def get_user_info(url_arg, file_arg, ip_arg, ip_file_arg):
     else:
         get_ip_info(ip_arg, ip_file_arg)
 
+
 def Detection():
     print('================================================')
     print('开始资产存活检测')
-    headers = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36',
-    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-    'Accept-Language': 'zh-CN,zh;q=0.9',
-    'Accept-Encoding': 'gzip, deflate, br',
-    # 'Connection':'keep-alive',#默认时链接一次，多次爬取之后不能产生新的链接就会产生报错Max retries exceeded with url
-    'Upgrade-Insecure-Requests': '1',
-    'Pragma': 'no-cache',
-    'Cache-Control': 'no-cache',
-    'Connection': 'close',  # 解决Max retries exceeded with url报错
-    }
 
     a = 0  # 可以访问次数
     b = 0  # 404站点次数
@@ -225,15 +240,29 @@ def Detection():
     print("存活资产文件已写入到active_url.txt文件中")
     print("需要手工检测资产文件已写入到vul_url.txt文件中")
 
+
 def Scan():
     print('================================================')
     print('开始使用afrog进行资产漏洞扫描')
     print('================================================')
-    targetfile= './result/active_url.txt'
-    outputfilename="result.html"
-    scan_command=".\\afrog\\afrog.exe -T {} -o {}".format(targetfile,outputfilename)
+    file_num = 0
+    try:
+        scanactivefile = open('./result/active_url.txt', encoding='utf-8')
+        scanactivelist = scanactivefile.read().splitlines()
+        file_num = len(scanactivelist)
+    except Exception as e:
+        pass
+    if file_num > 0:
+        filename = 'active_url'
+    else:
+        filename = 'fofa'
+    targetfile = './result/{}.txt'.format(filename)
+    outputfilename = "result.html"
+    scan_command = ".\\afrog\\afrog.exe -T {} -o {}".format(
+        targetfile, outputfilename)
     os.system(scan_command)
     print("\n扫面结果已经保存到reports/result.html中")
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -250,9 +279,9 @@ def main():
                         help='单个ip关联资产收集，例如：192.168.0.1', required=False)
     parser.add_argument('-if', '--ip-file', dest="ip_file", nargs='?',
                         help='多个ip关联资产收集，以文件形式存储,文件中的ip格式为192.168.0.1', required=False)
-    parser.add_argument('-d', '-D', dest="detection", nargs='?',default='False',
+    parser.add_argument('-d', '-D', dest="detection", nargs='?', default='False',
                         help='检测通过FOFA获取到的资产存活状态', required=False)
-    parser.add_argument('-s', '-S', dest="scan", nargs='?',default='False',
+    parser.add_argument('-s', '-S', dest="scan", nargs='?', default='False',
                         help='使用afrog对从fofa获取的资产进行扫描', required=False)
     url_arg = parser.parse_args().url
     file_arg = parser.parse_args().url_file
