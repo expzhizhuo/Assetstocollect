@@ -17,8 +17,8 @@ warnings.filterwarnings('ignore')
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = '1'
 
 config = {
-    'email': 'xxxxx',  # fofa的登录邮箱
-    'key': 'xxxxxx',  # fofa个人中心的key
+    'email': 'xxxxxxxxx',  # fofa的登录邮箱
+    'key': 'xxxxxxxxx',  # fofa个人中心的key
     'size': '100',  # 默认是是普通会员，普通会员做多100条，高级会员10000条
     'base_url': 'https://fofa.info/api/v1/search/all',  # fofa api接口地址
     'user_url': 'https://fofa.info/api/v1/info/my',  # fofa 账户信息接口
@@ -203,13 +203,7 @@ def Detection():
     print('================================================')
     urlfile = open('./result/fofa.txt', encoding='utf-8')
     urllist = urlfile.read().splitlines()
-    httpurl = open('./result/active_url.txt', 'a+', encoding='utf-8')
-    vulurl = open('./result/vul_url.txt', 'a+', encoding='utf-8')
-    vulurl.truncate(0)
-    httpurl.truncate(0)
     urlfile.close()
-    httpurl.close()
-    vulurl.close()
     for d in urllist:
         if 'http' in d:
             url = d
@@ -334,6 +328,12 @@ def main():
         print('请使用命令-h查看使用命令')
         return
     print('开始资产收集')
+    httpurl = open('./result/active_url.txt', 'a+', encoding='utf-8')
+    vulurl = open('./result/vul_url.txt', 'a+', encoding='utf-8')
+    vulurl.truncate(0)
+    httpurl.truncate(0)
+    httpurl.close()
+    vulurl.close()
     get_user_info(url_arg, file_arg, ip_arg, ip_file_arg,search_arg)
     if detection_arg is None:
         Detection()
