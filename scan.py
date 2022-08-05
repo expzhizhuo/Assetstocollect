@@ -1,5 +1,5 @@
 # /*
-#  * @Author: zhizhuo 
+#  * @Author: zhizhuo
 #  * @Date: 2022-07-06 08:57:13
 #  * @Last Modified by: zhizhuo
 #  * @Last Modified time: 2022-07-14 20:03:18
@@ -17,8 +17,8 @@ warnings.filterwarnings('ignore')
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = '1'
 
 config = {
-    'email': 'xxxxxxxx',  # fofa的登录邮箱
-    'key': 'xxxxxxx',  # fofa个人中心的key
+    'email': 'xxxxx',  # fofa的登录邮箱
+    'key': 'xxxxxx',  # fofa个人中心的key
     'size': '100',  # 默认是是普通会员，普通会员做多100条，高级会员10000条
     'base_url': 'https://fofa.info/api/v1/search/all',  # fofa api接口地址
     'user_url': 'https://fofa.info/api/v1/info/my',  # fofa 账户信息接口
@@ -44,6 +44,7 @@ def get_url_info(url_arg, file_arg):
     count = 0
     output_url = open('./result/fofa.txt', 'a+', encoding='utf-8')
     output_url.truncate(0)  # 对文件进行初始化操作
+    output_url.close()
     if url_arg is None:
         urlfile = open('{}'.format(file_arg),
                        encoding='utf8').read().splitlines()
@@ -73,14 +74,16 @@ def get_url_info(url_arg, file_arg):
                 count = count + resp['size']
             if resp['size'] > 0:
                 for key in range(0, int(len(resp['results']))):
-                    output_url.write(resp['results'][key][0])
-                    output_url.write('\n')
+                    with open('result/fofa.txt', 'a+', encoding='utf-8') as fa:
+                        fa.write(resp['results'][key][0])
+                        fa.write('\n')
             else:
-                output_url.write(url)
-                output_url.write('\n')
-    output_url.close()
+                with open('result/fofa.txt', 'a+', encoding='utf-8') as fa:
+                    fa.write(url)
+                    fa.write('\n')
     print('总共收集到{}个关联资产'.format(totals))
     print('已经写入{}个关联资产'.format(count))
+    print('结果已保存至result/fofa.txt中')
 
 
 def get_ip_info(ip_arg, ip_file_arg):
@@ -89,6 +92,7 @@ def get_ip_info(ip_arg, ip_file_arg):
     count = 0
     output_ip = open('./result/fofa.txt', 'a+', encoding='utf-8')
     output_ip.truncate(0)  # 对文件进行初始化操作
+    output_ip.close()
     if ip_arg is None:
         ipfile = open('{}'.format(ip_file_arg),
                       encoding='utf8').read().splitlines()
@@ -117,18 +121,50 @@ def get_ip_info(ip_arg, ip_file_arg):
                 count = count+resp['size']
             if resp['size'] > 0:
                 for key in range(0, int(len(resp['results']))):
-                    output_ip.write(resp['results'][key][0])
-                    output_ip.write('\n')
+                    with open('result/fofa.txt', 'a+', encoding='utf-8') as fa:
+                        fa.write(resp['results'][key][0])
+                        fa.write('\n')
             else:
-                output_ip.write(url)
-                output_ip.write('\n')
-    output_ip.close()
+                with open('result/fofa.txt', 'a+', encoding='utf-8') as fa:
+                    fa.write(url)
+                    fa.write('\n')
     print('总共收集到{}个关联资产'.format(totals))
     print('已经写入{}个关联资产'.format(count))
     print('结果已保存至result/fofa.txt中')
 
+def fofa_search(self):
+    totals = 0
+    count = 0
+    output_search = open('./result/fofa.txt', 'a+', encoding='utf-8')
+    output_search.truncate(0)  # 对文件进行初始化操作
+    output_search.close()
+    print('FOFA查询语句为：{}'.format(self))
+    base_fofa_search = base64.b64encode(self.encode('utf8'))
+    data = {
+        'email': config['email'],
+        'key': config['key'],
+        'qbase64': base_fofa_search,
+        'size': config['size'],
+    }
+    resp = requests.get(config['base_url'], data, timeout=60).json()
+    print('FOFA语句：{} 关联资产有{}个'.format(self, resp['size']))
+    totals = totals + resp['size']
+    if resp['size'] > config['size']:
+        count = config['size']
+    else:
+        count = count+resp['size']
+    if resp['size'] > 0:
+        for key in range(0, int(len(resp['results']))):
+            with open('result/fofa.txt', 'a+', encoding='utf-8') as fa:
+                fa.write(resp['results'][key][0])
+                fa.write('\n')
+    else:
+        pass
+    print('总共收集到{}个关联资产'.format(totals))
+    print('已经写入{}个关联资产'.format(count))
+    print('结果已保存至result/fofa.txt中')
 
-def get_user_info(url_arg, file_arg, ip_arg, ip_file_arg):
+def get_user_info(url_arg, file_arg, ip_arg, ip_file_arg,search_arg):
     print('开始检测fofa账户信息')
     data = {
         'email': config['email'],
@@ -150,6 +186,8 @@ def get_user_info(url_arg, file_arg, ip_arg, ip_file_arg):
     print('================================================')
     if url_arg is not None or file_arg is not None:
         get_url_info(url_arg, file_arg)
+    elif search_arg is not None:
+        fofa_search(search_arg)
     else:
         get_ip_info(ip_arg, ip_file_arg)
 
@@ -181,18 +219,18 @@ def Detection():
         try:
             resp = requests.get(url, headers, timeout=5, verify=False)
             print('站点状态码：'+str(resp.status_code))
-            if 'title' in resp.text or 'charset' in resp.text:
-                title_type = re.findall('charset=(.*?)"', resp.text)
-                title_type_or_url = re.findall('charset="(.*?)"', resp.text)
-            else:
-                title_type = []
-                title_type_or_url = []
-            if len(title_type) != 0 and (title_type[0] == 'gb2312' or (len(title_type_or_url) != 0 and title_type_or_url[0] == 'gb2312')):
+            if 'gb2312' in resp.text:
                 resp.encoding = "gb2312"
                 title_list = re.findall(r'<title>(.*?)</title>', resp.text)
                 # error_msg = re.findall(r'<h1>(.*?)</h1>', resp.text)
-            else:
+            elif '请在微信客户端打开链接' in resp.text:
+                title_list = re.findall(r'<title>(.*?)</title>', resp.text)
+                # error_msg = re.findall(r'<h1>(.*?)</h1>', resp.text)
+            elif 'utf-8' in resp.text:
                 resp.encoding = "utf-8"
+                title_list = re.findall(r'<title>(.*?)</title>', resp.text)
+                # error_msg = re.findall(r'<h1>(.*?)</h1>', resp.text)
+            else:
                 title_list = re.findall(r'<title>(.*?)</title>', resp.text)
                 # error_msg = re.findall(r'<h1>(.*?)</h1>', resp.text)
             if len(title_list) == 0:
@@ -282,18 +320,21 @@ def main():
                         help='检测通过FOFA获取到的资产存活状态', required=False)
     parser.add_argument('-s', '-S', dest="scan", nargs='?', default='False',
                         help='使用afrog对从fofa获取的资产进行扫描', required=False)
+    parser.add_argument('-se', '--search', dest="search", nargs='?',
+                        help='fofa语法查询，输入fofa的查询语句即可，程序会自动进行Base64加密', required=False)
     url_arg = parser.parse_args().url
     file_arg = parser.parse_args().url_file
     ip_arg = parser.parse_args().ip
     ip_file_arg = parser.parse_args().ip_file
     detection_arg = parser.parse_args().detection
     scan_arg = parser.parse_args().scan
+    search_arg = parser.parse_args().search
     print('关联资产收集基于FOFA API --By zhizhuo \n由于FOFA会员等级限制，普通会员最多100条，高级会员做多10000条 \n程序默认下载api可获取最大数量')
-    if url_arg is None and ip_arg is None and ip_file_arg is None and file_arg is None:
+    if url_arg is None and ip_arg is None and ip_file_arg is None and file_arg is None and search_arg is None:
         print('请使用命令-h查看使用命令')
         return
     print('开始资产收集')
-    get_user_info(url_arg, file_arg, ip_arg, ip_file_arg)
+    get_user_info(url_arg, file_arg, ip_arg, ip_file_arg,search_arg)
     if detection_arg is None:
         Detection()
     else:
