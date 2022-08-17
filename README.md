@@ -13,6 +13,7 @@
 - 新增其他测绘平台 未完成
 - 新增数据自动去重 未完成
 - 新增子域名资产穷举 未完成
+- 新增fofa语句插件 已完成
 
 ## 配置
 
@@ -27,8 +28,6 @@ config = {
     'user_url': 'https://fofa.info/api/v1/info/my',  # fofa 账户信息接口
 }
 ```
-
-
 
 首次使用需要安装依赖文件
 
@@ -47,10 +46,6 @@ python3 .\scan.py -h
 就可以查看相关使用命令
 
 ```bash
-usage: scan.py [-h] [-u URL] [-uf [URL_FILE]] [-i IP] [-if [IP_FILE]] [-d [DETECTION]] [-s [SCAN]]
-
-关联资产收集基于FOFA API --By zhizhuo 由于FOFA会员等级限制，普通会员最多100条，高级会员做多10000条 程序默认下载api可获取最大数量
-
 optional arguments:
   -h, --help            show this help message and exit
   -u URL, -url URL      单个url关联资产收集，例如：baidu.com顶级域名
@@ -62,9 +57,13 @@ optional arguments:
   -d [DETECTION], -D [DETECTION]
                         检测通过FOFA获取到的资产存活状态
   -s [SCAN], -S [SCAN]  使用afrog对从fofa获取的资产进行扫描
+  -se [SEARCH], --search [SEARCH]
+                        fofa语法查询，输入fofa的查询语句即可，程序会自动进行Base64加密
 ```
 
 **输出文件在脚本的当前目录在result目录下面**
+
+**fofa的查询结果在fofa.txt中**
 
 **afrog的扫描结果在reports目录下面**
 
