@@ -212,21 +212,9 @@ def Detection():
         print('开始检测：'+url)
         try:
             resp = requests.get(url, headers, timeout=5, verify=False)
+            resp.encoding = resp.apparent_encoding
             print('站点状态码：'+str(resp.status_code))
-            if 'gb2312' in resp.text:
-                resp.encoding = "gb2312"
-                title_list = re.findall(r'<title>(.*?)</title>', resp.text)
-                # error_msg = re.findall(r'<h1>(.*?)</h1>', resp.text)
-            elif '请在微信客户端打开链接' in resp.text:
-                title_list = re.findall(r'<title>(.*?)</title>', resp.text)
-                # error_msg = re.findall(r'<h1>(.*?)</h1>', resp.text)
-            elif 'utf-8' in resp.text:
-                resp.encoding = "utf-8"
-                title_list = re.findall(r'<title>(.*?)</title>', resp.text)
-                # error_msg = re.findall(r'<h1>(.*?)</h1>', resp.text)
-            else:
-                title_list = re.findall(r'<title>(.*?)</title>', resp.text)
-                # error_msg = re.findall(r'<h1>(.*?)</h1>', resp.text)
+            title_list = re.findall(r'<title>(.*?)</title>', resp.text)
             if len(title_list) == 0:
                 title = ""
                 print("未识别到title")
